@@ -2,51 +2,14 @@
 
 Sistema de chamados com backend em Node.js/Express + MongoDB e frontend em React.
 
-O projeto hoje roda com:
-- API em `http://localhost:5000`
-- Frontend em `http://localhost:3000`
+## Estrutura
 
-## Stack
+O projeto foi separado em duas aplicacoes:
 
-- Node.js
-- Express
-- MongoDB
-- Mongoose
-- React
-- React Router
-- React Hook Form
-- Tailwind CSS
-- Socket.IO
-- JWT
-- Multer
-- Docker / Docker Compose
+- `backend/`: API Express, Socket.IO, modelos, controllers e seed
+- `frontend/`: app React, paginas, componentes e cliente HTTP
 
-## Principais funcionalidades
-
-- Cadastro e login de usuarios
-- Autenticacao com JWT e refresh token
-- CRUD de chamados
-- Dashboard com estatisticas
-- Gestao de clientes
-- Perfil de usuario com avatar
-- Comentarios internos em chamados
-- Upload de anexos
-- Exportacao CSV
-- Logs de auditoria
-- Notificacoes em tempo real via Socket.IO
-- Lixeira de notas e chamados para administradores
-
-## Estrutura atual
-
-Hoje o repositorio ainda mistura backend e frontend na mesma base:
-
-- API Express em `src/server.js`, `src/app.js`, `src/routes.js`
-- Frontend React em `src/index.js`, `src/App.jsx` e `src/controllers/*.jsx`
-
-Funciona assim, mas no futuro vale separar em:
-
-- `backend/`
-- `frontend/`
+Na raiz ficaram apenas arquivos de orquestracao, como `docker-compose.yml`, scripts utilitarios e comandos de conveniencia.
 
 ## Requisitos
 
@@ -57,7 +20,7 @@ Funciona assim, mas no futuro vale separar em:
 
 ### Backend
 
-Arquivo: [`.env`](C:\Users\asssa\Documents\LINGUAGEM\Old_Chamados-api\.env)
+Arquivo: [`backend/.env`](C:\Users\asssa\Documents\LINGUAGEM\chamados-api\backend\.env)
 
 Exemplo:
 
@@ -69,112 +32,105 @@ JWT_SECRET=SuaChaveSuperSecreta123
 
 Observacoes:
 
-- O projeto aceita `MONGO_URL` ou `MONGO_URI`
-- No estado atual, o arquivo usa `MONGO_URL`
+- o projeto aceita `MONGO_URL` ou `MONGO_URI`
+- uploads ficam em `backend/uploads/`
 
 ### Frontend
 
-Arquivo: [`.env.development`](C:\Users\asssa\Documents\LINGUAGEM\Old_Chamados-api\.env.development)
+Arquivo: [`frontend/.env.development`](C:\Users\asssa\Documents\LINGUAGEM\chamados-api\frontend\.env.development)
 
 ```env
 PORT=3000
 REACT_APP_API_URL=http://localhost:5000
 ```
 
-Isso garante:
-
-- frontend em `3000`
-- backend em `5000`
-
 ## Instalacao
 
-No PowerShell do Windows, prefira `npm.cmd` em vez de `npm` se sua maquina bloquear scripts do PowerShell.
+No PowerShell do Windows, prefira `npm.cmd`.
+
+Para instalar tudo:
 
 ```powershell
-npm.cmd install
+npm.cmd run install:all
+```
+
+Ou separadamente:
+
+```powershell
+npm.cmd install --prefix backend
+npm.cmd install --prefix frontend
 ```
 
 ## Como rodar localmente
 
-### 1. Subir o MongoDB
+### Pela raiz
 
-Se voce tiver MongoDB local instalado, deixe o servico rodando.
-
-Se preferir Docker:
-
-```powershell
-docker compose up -d mongodb
-```
-
-### 2. Rodar a API
+Backend:
 
 ```powershell
 npm.cmd start
 ```
 
-API disponivel em:
-
-- [http://localhost:5000](http://localhost:5000)
-- [http://localhost:5000/health](http://localhost:5000/health)
-
-### 3. Rodar o frontend
-
-Em outro terminal:
+Frontend:
 
 ```powershell
 npm.cmd run web
 ```
 
-Frontend disponivel em:
-
-- [http://localhost:3000](http://localhost:3000)
-
-## Fluxo recomendado de execucao
-
-Abra dois terminais:
-
-Terminal 1:
-
-```powershell
-npm.cmd start
-```
-
-Terminal 2:
-
-```powershell
-npm.cmd run web
-```
-
-## Criar usuario administrador inicial
-
-Para popular o banco com um admin padrao:
+Seed:
 
 ```powershell
 npm.cmd run seed
 ```
 
-Credenciais criadas:
+### Diretamente nas pastas
 
-- email: `admin@admin.com`
-- senha: `adminpassword123`
+Backend:
 
-## Scripts disponiveis
+```powershell
+cd backend
+npm.cmd start
+```
+
+Frontend:
+
+```powershell
+cd frontend
+npm.cmd start
+```
+
+## Enderecos padrao
+
+- API: [http://localhost:5000](http://localhost:5000)
+- Healthcheck: [http://localhost:5000/health](http://localhost:5000/health)
+- Frontend: [http://localhost:3000](http://localhost:3000)
+- Uploads: `http://localhost:5000/uploads/<arquivo>`
+
+## Scripts da raiz
 
 ```json
 {
-  "dev": "nodemon -L src/server.js",
-  "start": "node src/server.js",
-  "seed": "node src/database/seed.js",
-  "web": "react-scripts start"
+  "dev": "npm --prefix backend run dev",
+  "start": "npm --prefix backend start",
+  "seed": "npm --prefix backend run seed",
+  "web": "npm --prefix frontend start",
+  "build:web": "npm --prefix frontend run build",
+  "install:all": "npm install --prefix backend && npm install --prefix frontend"
 }
 ```
 
-Uso:
+## Docker
 
-- `npm.cmd run dev`: sobe a API com nodemon
-- `npm.cmd start`: sobe a API em modo normal
-- `npm.cmd run seed`: cria ou reseta o admin inicial
-- `npm.cmd run web`: sobe o frontend React
+Cada aplicacao agora possui seu proprio `Dockerfile`:
+
+- [`backend/Dockerfile`](C:\Users\asssa\Documents\LINGUAGEM\chamados-api\backend\Dockerfile)
+- [`frontend/Dockerfile`](C:\Users\asssa\Documents\LINGUAGEM\chamados-api\frontend\Dockerfile)
+
+Para subir tudo:
+
+```powershell
+docker compose up --build
+```
 
 ## Endpoints uteis
 
@@ -212,119 +168,21 @@ Uso:
 - `DELETE /trash/tickets/:id/hard`
 - `DELETE /chamados/:id`
 
-## Uploads
+## Verificacao
 
-Os uploads ficam expostos em:
-
-- `http://localhost:5000/uploads/<arquivo>`
-
-## Docker
-
-O projeto possui:
-
-- [docker-compose.yml](C:\Users\asssa\Documents\LINGUAGEM\Old_Chamados-api\docker-compose.yml)
-- [Dockerfile](C:\Users\asssa\Documents\LINGUAGEM\Old_Chamados-api\Dockerfile)
-
-Para subir tudo via Docker:
-
-```powershell
-docker compose up --build
-```
-
-Observacao:
-
-- o frontend em Docker usa `npm run web`
-- a API em Docker usa `npm run dev`
-
-## Melhorias feitas recentemente
-
-As seguintes correcoes e melhorias foram aplicadas:
-
-- ajuste da leitura de `MONGO_URL` e `MONGO_URI`
-- correcao da inicializacao da API
-- instalacao e declaracao de dependencias faltantes
-- criacao de rotas publicas `/` e `/health`
-- correcao de imports quebrados no frontend
-- criacao de `public/index.html`
-- configuracao do frontend para rodar em `3000`
-- configuracao do Tailwind CSS
-- repaginacao visual das telas principais
-- correcao de bugs em telas React, incluindo `Clientes`
-- validacao do build do frontend com sucesso
-
-## Comandos de verificacao
-
-### Verificar API
+API:
 
 ```powershell
 Invoke-WebRequest http://localhost:5000/health
 ```
 
-Resposta esperada:
+Frontend:
 
-```json
-{"status":"ok"}
-```
+- abra [http://localhost:3000](http://localhost:3000)
 
-### Verificar frontend
+## Observacoes da migracao
 
-Abra:
-
-- [http://localhost:3000](http://localhost:3000)
-
-## Problemas comuns
-
-### 1. PowerShell bloqueia `npm`
-
-Erro comum:
-
-`npm.ps1 cannot be loaded because running scripts is disabled`
-
-Solucao:
-
-```powershell
-npm.cmd install
-npm.cmd start
-npm.cmd run web
-```
-
-### 2. `User not found` no login
-
-O banco nao possui usuario cadastrado.
-
-Solucao:
-
-```powershell
-npm.cmd run seed
-```
-
-### 3. Frontend sobe sem estilo
-
-Verifique se as dependencias foram instaladas:
-
-```powershell
-npm.cmd install
-```
-
-E reinicie:
-
-```powershell
-npm.cmd run web
-```
-
-### 4. Porta ocupada
-
-O backend usa `5000` e o frontend usa `3000`.
-
-Confira:
-
-- [`.env`](C:\Users\asssa\Documents\LINGUAGEM\Old_Chamados-api\.env)
-- [`.env.development`](C:\Users\asssa\Documents\LINGUAGEM\Old_Chamados-api\.env.development)
-
-## Proximos passos sugeridos
-
-- separar frontend e backend em pastas independentes
-- adicionar script `build` no `package.json`
-- melhorar cobertura de testes
-- padronizar encoding dos arquivos
-- revisar algumas telas secundarias para manter o novo padrao visual
+- backend e frontend foram separados fisicamente
+- URLs hardcoded do frontend foram ajustadas para usar a configuracao da API
+- uploads do backend agora sao servidos a partir de `backend/uploads`
+- `docker-compose.yml` passou a buildar cada app da sua propria pasta

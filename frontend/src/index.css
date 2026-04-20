@@ -1,0 +1,95 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --app-bg: #f3efe6;
+  --app-bg-soft: #fbf8f2;
+  --app-ink: #15202b;
+  --app-panel: rgba(255, 252, 247, 0.85);
+  --app-line: rgba(127, 93, 53, 0.14);
+  --app-brand: #b85c38;
+  --app-brand-deep: #7f5539;
+  --app-brand-soft: #f4d8c2;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  color: var(--app-ink);
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.95), transparent 28%),
+    radial-gradient(circle at top right, rgba(244, 216, 194, 0.7), transparent 24%),
+    linear-gradient(180deg, var(--app-bg-soft) 0%, var(--app-bg) 100%);
+  background-attachment: fixed;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+::selection {
+  background: rgba(184, 92, 56, 0.18);
+}
+
+.app-shell {
+  position: relative;
+}
+
+.app-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(127, 85, 57, 0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(127, 85, 57, 0.03) 1px, transparent 1px);
+  background-size: 32px 32px;
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.45), transparent 75%);
+}
+
+.surface-card {
+  background: var(--app-panel);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--app-line);
+  box-shadow: 0 18px 60px rgba(76, 52, 32, 0.08);
+}
+
+.brand-button {
+  background: linear-gradient(135deg, var(--app-brand) 0%, var(--app-brand-deep) 100%);
+  box-shadow: 0 18px 32px rgba(184, 92, 56, 0.28);
+}
+
+.brand-button:hover {
+  filter: brightness(1.04);
+}
+
+.auth-mesh {
+  background:
+    radial-gradient(circle at 15% 20%, rgba(184, 92, 56, 0.18), transparent 20%),
+    radial-gradient(circle at 85% 15%, rgba(45, 106, 79, 0.18), transparent 18%),
+    radial-gradient(circle at 50% 100%, rgba(127, 85, 57, 0.1), transparent 22%);
+}
+
+.slide-up {
+  animation: slide-up 0.55s ease-out;
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
