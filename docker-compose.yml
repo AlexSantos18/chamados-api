@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_chamados
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || mongo --eval 'db.adminCommand(\"ping\")'"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api:
+    build: .
+    container_name: api_chamados
+    command: npm run dev
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/chamados
+      - JWT_SECRET=SuaChaveSuperSecretaNoDocker
+      - PORT=5000
+      - MAIL_HOST=sandbox.smtp.mailtrap.io
+      - MAIL_PORT=2525
+      - MAIL_USER=seu_usuario
+      - MAIL_PASS=sua_senha
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    volumes:
+      - .:/usr/app
+      - /usr/app/node_modules
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build: .
+    container_name: frontend_chamados
+    command: npm run web
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000
+      - HOST=0.0.0.0
+      - WATCHPACK_POLLING=true
+      - CHOKIDAR_USEPOLLING=true
+    volumes:
+      - .:/usr/app
+      - /usr/app/node_modules
+    stdin_open: true
+    tty: true
+    depends_on:
+      - api
+
+  seed:
+    build: .
+    container_name: seed_chamados
+    command: npm run seed
+    environment:
+      - MONGO_URI=mongodb://mongodb:27017/chamados
+    depends_on:
+      mongodb:
+        condition: service_healthy
+
+volumes:
+  mongo_data:
