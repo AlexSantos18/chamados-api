@@ -237,7 +237,7 @@ const ListagemChamados = () => {
 
                       <div className="mt-5 grid gap-3 text-sm text-stone-500 md:grid-cols-3">
                         <div className="rounded-2xl bg-white/60 px-4 py-3"><span className="inline-flex items-center gap-2"><FiBriefcase /> Cliente: {chamado.cliente?.nome || 'Nao informado'}</span></div>
-                        <div className="rounded-2xl bg-white/60 px-4 py-3"><span className="inline-flex items-center gap-2"><FiUser /> Tecnico: {chamado.user?.name || 'Nao informado'}</span></div>
+                        <div className="rounded-2xl bg-white/60 px-4 py-3"><span className="inline-flex items-center gap-2"><FiUser /> Usuario: {chamado.user?.name || 'Nao informado'}</span></div>
                         <div className="rounded-2xl bg-white/60 px-4 py-3"><span className="inline-flex items-center gap-2"><FiCalendar /> {new Date(chamado.createdAt).toLocaleDateString()}</span></div>
                       </div>
                     </div>

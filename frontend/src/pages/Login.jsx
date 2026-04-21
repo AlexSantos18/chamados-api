@@ -26,7 +26,7 @@ const Login = () => {
       <div className="grid w-full max-w-6xl gap-6 lg:grid-cols-[1.1fr_520px]">
         <section className="slide-up hidden rounded-[36px] border border-white/70 bg-white/55 p-10 shadow-[0_24px_70px_rgba(90,63,42,0.12)] backdrop-blur-xl lg:flex lg:flex-col lg:justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-stone-500">CHAMADOS.io</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-stone-500">CHAMADOS</p>
             <h1 className="mt-5 max-w-xl text-5xl font-black leading-[1.05] tracking-tight text-slate-800">
               Atendimento mais claro, rapido e confiavel.
             </h1>
@@ -38,7 +38,7 @@ const Login = () => {
           <div className="grid grid-cols-3 gap-4">
             {[
               ['Fluxo', 'Chamados e comentarios em uma rotina mais simples.'],
-              ['Controle', 'Auditoria e historico para sua equipe acompanhar.'],
+              ['Controle', 'Auditoria e historico para acompanhar.'],
               ['Visao', 'Dashboard com leitura rapida do que esta em aberto.']
             ].map(([title, text]) => (
               <div key={title} className="rounded-3xl border border-stone-200/70 bg-white/70 p-4">

@@ -1,41 +1,45 @@
 const multer = require('multer');
 const path = require('path');
-const crypto = require('crypto');
+const fs = require('fs');
 
-const uploadsFolder = path.resolve(__dirname, '..', '..', 'uploads');
+// Define o diretório de upload
+const uploadDir = path.resolve(__dirname, '..', '..', 'uploads');
 
-module.exports = {
-  dest: uploadsFolder, // Destino padrão para os arquivos
-  storage: multer.diskStorage({
-    destination: (req, file, cb) => {
-      cb(null, uploadsFolder);
-    },
-    filename: (req, file, cb) => {
-      crypto.randomBytes(16, (err, hash) => {
-        if (err) cb(err);
+// Garante que o diretório de upload exista
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
 
-        const fileName = `${hash.toString('hex')}-${file.originalname}`;
-        cb(null, fileName);
-      });
-    },
-  }),
-  limits: {
-    fileSize: 2 * 1024 * 1024, // Limite de 2MB
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, uploadDir);
   },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    const name = path.basename(file.originalname, ext);
+    cb(null, `${name}-${Date.now()}${ext}`);
+  },
+});
+
+const upload = multer({
+  storage: storage,
+  limits: { fileSize: 10 * 1024 * 1024 }, // Limite de 10MB por arquivo (ajuste conforme necessário)
   fileFilter: (req, file, cb) => {
     const allowedMimes = [
-      'image/jpeg',
-      'image/pjpeg',
-      'image/png',
+      'image/jpeg', 'image/pjpeg', 'image/png', 'image/gif',
       'application/pdf',
-      'application/msword', // .doc
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .docx
+      'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // .doc e .docx
+      'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // .xls e .xlsx
+      'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', // .ppt e .pptx
+      'text/plain'
     ];
 
     if (allowedMimes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error('Tipo de arquivo inválido.'));
+      cb(new Error('Tipo de arquivo inválido. Apenas imagens, PDFs, documentos Office e texto são permitidos.'));
     }
   },
-};
+});
+
+module.exports = upload;

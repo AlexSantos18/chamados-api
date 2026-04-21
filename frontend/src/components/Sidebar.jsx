@@ -8,7 +8,7 @@ const Sidebar = () => {
   const location = useLocation();
 
   const menuItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: <FiLayout />, admin: true },
+    { name: 'Dashboard', path: '/dashboard', icon: <FiLayout />, admin: false },
     { name: 'Novo Chamado', path: '/chamados/novo', icon: <FiPlusSquare />, admin: false },
     { name: 'Consultar Chamados', path: '/chamados', icon: <FiFileText />, admin: false },
     { name: 'Clientes', path: '/clientes', icon: <FiUsers />, admin: false },
@@ -41,7 +41,7 @@ const Sidebar = () => {
           <div className="mb-6 flex items-center justify-between px-2">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.35em] text-stone-400">Painel</p>
-              <h2 className="mt-2 text-2xl font-black italic tracking-tight text-amber-100">CHAMADOS.io</h2>
+              <h2 className="mt-2 text-2xl font-black italic tracking-tight text-amber-100">CHAMADOS</h2>
             </div>
             <button onClick={() => setIsSidebarOpen(false)} className="rounded-full p-2 text-stone-400 transition hover:bg-white/10 hover:text-white md:hidden">
               <FiX size={20} />

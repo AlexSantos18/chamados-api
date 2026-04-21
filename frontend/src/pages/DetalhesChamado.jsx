@@ -193,7 +193,7 @@ const DetalhesChamado = () => {
             </section>
 
             <section className="surface-card rounded-[34px] p-6">
-              <p className="text-xs font-bold uppercase tracking-[0.24em] text-stone-400">Tecnico responsavel</p>
+              <p className="text-xs font-bold uppercase tracking-[0.24em] text-stone-400">Usuario responsavel</p>
               <div className="mt-4 flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-amber-500 text-white font-bold">
                   {chamado.user?.name?.charAt(0)}
