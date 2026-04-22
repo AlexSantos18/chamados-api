@@ -1,4 +1,4 @@
-# Chamados.io
+# Chamados-api
 
 Sistema de chamados com backend em Node.js/Express + MongoDB e frontend em React.
 

@@ -1,6 +1,7 @@
 const express = require('express');
 const routes = express.Router();
 const multer = require('multer');
+const path = require('path');
 
 const AuthController = require('./controllers/AuthController');
 const ChamadoController = require('./controllers/ChamadoController');
@@ -11,6 +12,9 @@ const multerConfig = require('./config/multer');
 const authMiddleware = require('./middlewares/auth');
 const validate = require('./middlewares/validate');
 const { registerSchema, loginSchema, chamadoSchema, commentSchema } = require('./schemas');
+
+// Rota para servir arquivos estáticos (anexos)
+routes.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 // Rotas publicas
 routes.get('/', (req, res) => {
@@ -32,9 +36,10 @@ routes.use(authMiddleware);
 
 // Rotas de chamados
 routes.get('/chamados', ChamadoController.list);
+routes.get('/dashboard', ChamadoController.getDashboard);
 routes.get('/chamados/export/csv', ChamadoController.exportCSV);
 routes.get('/chamados/:id', ChamadoController.show);
-routes.post('/chamados', multer(multerConfig).array('attachments', 5), validate(chamadoSchema), ChamadoController.create);
+routes.post('/chamados', multerConfig.array('attachments', 5), validate(chamadoSchema), ChamadoController.create);
 routes.put('/chamados/:id', ChamadoController.update);
 routes.post('/chamados/:id/comments', validate(commentSchema), ChamadoController.addComment);
 routes.delete('/chamados/:id/comments/:commentId', ChamadoController.deleteComment);
@@ -46,7 +51,7 @@ routes.delete('/notifications', NotificationController.deleteAll);
 
 // Gestao de perfil
 routes.get('/me', UserController.show);
-routes.put('/profile', multer(multerConfig).single('avatar'), UserController.update);
+routes.put('/profile', multerConfig.single('avatar'), UserController.update);
 
 // Gestao de clientes
 routes.get('/clientes', ClienteController.list);
@@ -55,9 +60,8 @@ routes.put('/clientes/:id', ClienteController.update);
 
 // Rotas administrativas
 const { isAdmin } = require('./middlewares/auth');
-routes.get('/dashboard', isAdmin, ChamadoController.getDashboard);
-routes.get('/trash', isAdmin, ChamadoController.listTrash);
-routes.get('/trash/tickets', isAdmin, ChamadoController.listTicketTrash);
+routes.get('/trash', ChamadoController.listTrash);
+routes.get('/trash/tickets', ChamadoController.listTicketTrash);
 routes.post('/trash/tickets/:id/restore', isAdmin, ChamadoController.restoreTicket);
 routes.delete('/trash/tickets/:id/hard', isAdmin, ChamadoController.hardDeleteTicket);
 routes.post('/trash/:id/restore', isAdmin, ChamadoController.restoreComment);

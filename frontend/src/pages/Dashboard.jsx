@@ -149,7 +149,7 @@ const Dashboard = () => {
                 <h2 className="flex items-center gap-2 text-xl font-bold text-slate-800">
                   <FiActivity className="text-orange-600" /> Evolucao de chamados
                 </h2>
-                <p className="mt-2 text-sm text-stone-500">Leitura rapida do fluxo recente para apoiar a priorizacao.</p>
+                <p className="mt-2 text-sm text-stone-500">Leitura rapida do fluxo recente dos chamados.</p>
               </div>
 
               <div className="inline-flex rounded-2xl border border-stone-200 bg-stone-100/80 p-1">
@@ -187,7 +187,7 @@ const Dashboard = () => {
           <div className="space-y-6">
             <div className="surface-card rounded-[32px] p-6 md:p-8">
               <h2 className="text-xl font-bold text-slate-800">Distribuicao atual</h2>
-              <p className="mt-2 text-sm text-stone-500">Status dominantes no momento.</p>
+              <p className="mt-2 text-sm text-stone-500">Status no momento.</p>
               <div className="mt-6 h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>

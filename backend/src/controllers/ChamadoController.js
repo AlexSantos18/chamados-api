@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const Chamado = require('../models/Chamado');
 const Log = require('../models/Log');
 const Trash = require('../models/Trash');
@@ -11,6 +12,8 @@ module.exports = {
   async create(req, res, next) {
     try {
       const { title, description, clienteId, priority } = req.body;
+      console.log('Received files:', req.files); // Adicione esta linha para depuração
+
       const attachments = req.files ? req.files.map(file => file.filename) : [];
 
       const chamado = await Chamado.create({
@@ -53,6 +56,18 @@ module.exports = {
         return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
+      // Lógica robusta para comparar IDs (funciona sendo String ou ObjectId)
+      // Se chamado.user for um objeto (populado), pegamos o _id, senão pegamos o valor direto.
+      const ownerId = chamado.user?._id || chamado.user;
+      
+      // Forçamos a conversão para String para evitar erros de tipo no comparador ===
+      const isOwner = String(ownerId) === String(req.userId);
+      const isAdmin = String(req.userRole).toLowerCase() === 'admin';
+
+      if (!isAdmin && !isOwner) {
+        return res.status(403).json({ error: 'Você não tem permissão para visualizar este chamado' });
+      }
+
       const logs = await Log.find({ chamado: id })
         .populate('user', 'name')
         .sort('-createdAt');
@@ -70,6 +85,14 @@ module.exports = {
 
       const chamado = await Chamado.findById(id);
       if (!chamado) return res.status(404).json({ error: 'Chamado não encontrado' });
+
+      const ownerId = chamado.user?._id || chamado.user;
+      const isOwner = String(ownerId) === String(req.userId);
+      const isAdmin = String(req.userRole).toLowerCase() === 'admin';
+
+      if (!isAdmin && !isOwner) {
+        return res.status(403).json({ error: 'Você não tem permissão para interagir neste chamado' });
+      }
 
       chamado.comments.push({ text, user: req.userId });
       await chamado.save();
@@ -124,7 +147,13 @@ module.exports = {
       if (status) filters.status = status;
       if (priority) filters.priority = priority;
       if (clienteId) filters.cliente = clienteId;
-      if (userId) filters.user = userId;
+      
+      // Se não for admin, obriga a filtrar apenas os próprios chamados
+      if (req.userRole !== 'admin') {
+        filters.user = req.userId;
+      } else if (userId) {
+        filters.user = userId;
+      }
       
       // Filtro por período
       if (startDate || endDate) {
@@ -165,6 +194,19 @@ module.exports = {
   async update(req, res, next) {
     try {
       const { id } = req.params;
+
+      const chamadoExists = await Chamado.findById(id);
+      if (!chamadoExists) {
+        return res.status(404).json({ error: 'Chamado não encontrado' });
+      }
+
+      const ownerId = chamadoExists.user?._id || chamadoExists.user;
+      const isAdmin = String(req.userRole).toLowerCase() === 'admin';
+
+      // Segurança: Apenas o dono ou Admin pode atualizar o chamado
+      if (!isAdmin && String(ownerId) !== String(req.userId)) {
+        return res.status(403).json({ error: 'Você não tem permissão para alterar este chamado' });
+      }
       
       // Impede que o usuário altere o dono do chamado via update
       const updateData = { ...req.body };
@@ -219,19 +261,31 @@ module.exports = {
   async delete(req, res, next) {
     try {
       const { id } = req.params;
-      const chamado = await Chamado.findByIdAndDelete(id);
+      const { reason } = req.body;
+
+      const chamado = await Chamado.findById(id);
 
       if (!chamado) {
         return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
-      await Log.create({
-        action: 'Deletou chamado',
-        user: req.userId,
-        chamado: id // Mantemos o ID aqui pois o documento original foi removido
+      // Move os dados para a lixeira de chamados antes de deletar
+      await ChamadoTrash.create({
+        originalId: chamado._id,
+        data: chamado.toObject(),
+        deletedBy: req.userId,
+        reason: reason || 'Removido via interface de listagem'
       });
 
-      return res.json({ message: 'Chamado deletado com sucesso' });
+      await Chamado.findByIdAndDelete(id);
+
+      await Log.create({
+        action: 'Deletou chamado (movido para lixeira)',
+        user: req.userId,
+        chamado: id
+      });
+
+      return res.json({ message: 'Chamado movido para a lixeira com sucesso' });
     } catch (err) {
       next(err);
     }
@@ -242,12 +296,16 @@ module.exports = {
       const { days = 7 } = req.query;
       const daysInt = parseInt(days) || 7;
 
+      // Se não for admin, filtra apenas os chamados criados pelo próprio usuário.
+      // Importante: Para a agregação (gráfico), o ID deve ser um ObjectId real.
+      const filter = req.userRole === 'admin' ? {} : { user: new mongoose.Types.ObjectId(req.userId) };
+
       const stats = {
-        total: await Chamado.countDocuments(),
-        abertos: await Chamado.countDocuments({ status: 'aberto' }),
-        em_andamento: await Chamado.countDocuments({ status: 'em_andamento' }),
-        concluidos: await Chamado.countDocuments({ status: 'concluido' }),
-        cancelados: await Chamado.countDocuments({ status: 'cancelado' }),
+        total: await Chamado.countDocuments(filter),
+        abertos: await Chamado.countDocuments({ ...filter, status: 'aberto' }),
+        em_andamento: await Chamado.countDocuments({ ...filter, status: 'em_andamento' }),
+        concluidos: await Chamado.countDocuments({ ...filter, status: 'concluido' }),
+        cancelados: await Chamado.countDocuments({ ...filter, status: 'cancelado' }),
       };
 
       // Busca evolução dos últimos N dias
@@ -255,7 +313,7 @@ module.exports = {
       startDate.setDate(startDate.getDate() - daysInt);
 
       const evolution = await Chamado.aggregate([
-        { $match: { createdAt: { $gte: startDate } } },
+        { $match: { ...filter, createdAt: { $gte: startDate } } },
         {
           $group: {
             _id: { $dateToString: { format: "%d/%m", date: "$createdAt" } },
@@ -278,7 +336,10 @@ module.exports = {
 
   async listTrash(req, res, next) {
     try {
-      const items = await Trash.find()
+      // Filtra para que user comum veja apenas as notas que ele mesmo escreveu
+      const filter = req.userRole === 'admin' ? {} : { author: req.userId };
+
+      const items = await Trash.find(filter)
         .populate('author', 'name email')
         .populate('deletedBy', 'name email')
         .populate('chamado', 'title')
@@ -327,6 +388,11 @@ module.exports = {
       if (title) {
         const escapedTitle = title.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         filters['data.title'] = new RegExp(escapedTitle, 'i');
+      }
+
+      // Filtra para que user comum veja apenas os chamados que ele criou
+      if (req.userRole !== 'admin') {
+        filters['data.user'] = req.userId;
       }
 
       const items = await ChamadoTrash.find(filters)
@@ -379,7 +445,13 @@ module.exports = {
 
       if (status) filters.status = status;
       if (clienteId) filters.cliente = clienteId;
-      if (userId) filters.user = userId;
+      
+      // Aplica a mesma restrição de segurança na exportação do CSV
+      if (req.userRole !== 'admin') {
+        filters.user = req.userId;
+      } else if (userId) {
+        filters.user = userId;
+      }
       
       if (startDate || endDate) {
         filters.createdAt = {};

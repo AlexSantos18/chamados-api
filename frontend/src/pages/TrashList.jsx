@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { toast } from 'react-toastify';
-import { FiTrash2, FiRefreshCcw, FiClock, FiUser, FiFileText } from 'react-icons/fi';
+import { FiTrash2, FiRefreshCcw, FiClock, FiUser, FiFileText, FiAlertCircle } from 'react-icons/fi';
+import { useAuth } from '../AuthContext';
 
 const TrashList = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { isAdmin } = useAuth();
 
   const fetchTrash = async () => {
     setLoading(true);
@@ -35,73 +37,71 @@ const TrashList = () => {
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-            <FiTrash2 className="text-red-500" /> Lixeira de Auditoria
-          </h1>
-          <p className="text-gray-500 mt-2">Gerencie notas excluídas e realize a restauração de dados se necessário.</p>
-        </header>
+    <div className="px-1 py-4 md:py-5">
+      <div className="mx-auto max-w-7xl">
+        <section className="surface-card slide-up rounded-[34px] p-6 md:p-8 mb-6">
+          <p className="text-sm font-semibold uppercase tracking-[0.35em] text-stone-400">Auditoria</p>
+          <div className="mt-4 flex items-center gap-3">
+            <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-rose-500 to-rose-700 text-white shadow-lg">
+              <FiTrash2 size={28} />
+            </div>
+            <div>
+              <h1 className="text-3xl font-black tracking-tight text-slate-800 md:text-4xl">Lixeira de notas</h1>
+              <p className="mt-1 text-sm text-stone-500">Notas e observações removidas dos seus atendimentos.</p>
+            </div>
+          </div>
+        </section>
 
         {loading ? (
-          <div className="text-center p-20 text-gray-400 animate-pulse">Consultando lixeira...</div>
+          <div className="text-center p-20 text-stone-400 animate-pulse font-bold">Consultando lixeira...</div>
         ) : (
-          <div className="grid grid-cols-1 gap-4">
+          <div className="space-y-4">
             {items.map(item => (
-              <div key={item._id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between gap-6">
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-3 text-blue-600 font-semibold text-sm">
+              <article key={item._id} className="surface-card rounded-[30px] p-6 transition-transform hover:-translate-y-1">
+                <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-4 text-sky-600 font-bold text-sm uppercase">
                     <FiFileText /> Chamado: {item.chamado?.title || 'Chamado excluído'}
                   </div>
-                  <p className="text-gray-700 bg-gray-50 p-4 rounded-lg italic border-l-4 border-gray-300">
+                  <blockquote className="text-slate-700 bg-stone-50 p-5 rounded-2xl italic border-l-4 border-orange-400 text-sm leading-7">
                     "{item.text}"
-                  </p>
+                  </blockquote>
                   
-                  <div className="mt-3 p-2 bg-red-50 rounded border border-red-100">
-                    <span className="text-[10px] font-bold text-red-400 uppercase block">Motivo do Log:</span>
-                    <p className="text-xs text-red-700 font-medium">{item.reason}</p>
+                  <div className="mt-4 p-3 bg-rose-50 rounded-xl border border-rose-100">
+                    <span className="text-[10px] font-bold text-rose-500 uppercase block mb-1">Motivo do descarte:</span>
+                    <p className="text-xs text-rose-800 font-medium">{item.reason}</p>
                   </div>
                   
-                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-500">
-                    <div className="flex flex-col gap-1">
-                      <span className="font-bold text-gray-400 uppercase">Autor Original</span>
-                      <div className="flex items-center gap-1">
-                        <FiUser /> {item.author?.name} ({item.author?.email})
-                      </div>
+                  <div className="mt-6 flex flex-wrap gap-6 text-[11px] text-stone-500">
+                    <div className="flex items-center gap-2">
+                      <FiUser className="text-orange-500" />
+                      <span><strong>Autor:</strong> {item.author?.name}</span>
                     </div>
-                    <div className="flex flex-col gap-1">
-                      <span className="font-bold text-gray-400 uppercase">Excluído Por</span>
-                      <div className="flex items-center gap-1">
-                        <FiUser className="text-red-400" /> {item.deletedBy?.name}
-                      </div>
+                    <div className="flex items-center gap-2">
+                      <FiClock />
+                      <span>{new Date(item.createdAt).toLocaleString()}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="md:w-48 flex flex-col justify-center border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6">
-                  <div className="text-xs text-gray-400 mb-4">
-                    <div className="flex items-center gap-1 mb-1">
-                      <FiClock /> Excluído em:
-                    </div>
-                    <div className="font-medium text-gray-600">
-                      {new Date(item.createdAt).toLocaleString()}
-                    </div>
+                {isAdmin && (
+                  <div className="w-full xl:w-[200px] flex items-center">
+                    <button
+                      onClick={() => handleRestore(item._id)}
+                      className="w-full flex items-center justify-center gap-2 bg-emerald-600 text-white py-4 px-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg"
+                    >
+                      <FiRefreshCcw /> Restaurar
+                    </button>
                   </div>
-                  
-                  <button
-                    onClick={() => handleRestore(item._id)}
-                    className="flex items-center justify-center gap-2 bg-green-600 text-white py-2 px-4 rounded-lg font-bold hover:bg-green-700 transition-colors shadow-md shadow-green-100"
-                  >
-                    <FiRefreshCcw /> Restaurar
-                  </button>
+                )}
                 </div>
-              </div>
+              </article>
             ))}
 
-            {items.length === 0 && (
-              <div className="bg-white p-16 text-center rounded-xl border-2 border-dashed border-gray-200">
-                <p className="text-gray-400 font-medium">A lixeira está vazia.</p>
+            {items.length === 0 && !loading && (
+              <div className="surface-card rounded-[30px] p-20 text-center">
+                <FiAlertCircle size={48} className="mx-auto text-stone-200 mb-4" />
+                <p className="text-stone-400 font-bold text-lg">Sua lixeira de notas está vazia.</p>
               </div>
             )}
           </div>

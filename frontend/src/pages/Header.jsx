@@ -35,7 +35,7 @@ const Header = () => {
           </button>
 
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-stone-400">Workspace</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-stone-400">Espaço de Trabalho</p>
             <h1 className="mt-1 text-lg font-bold text-slate-800">Central de chamados</h1>
           </div>
         </div>

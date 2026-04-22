@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { toast } from 'react-toastify';
-import { FiTrash, FiRefreshCcw, FiAlertTriangle, FiUser, FiCalendar, FiArchive, FiSearch, FiFilter } from 'react-icons/fi';
+import { FiTrash, FiRefreshCcw, FiAlertTriangle, FiUser, FiCalendar, FiArchive, FiSearch, FiFilter, FiInfo } from 'react-icons/fi';
+import { useAuth } from '../AuthContext';
 
 const ChamadoTrashList = () => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
+  const { isAdmin } = useAuth();
 
   const fetchTrash = async () => {
     setLoading(true);
@@ -57,96 +59,107 @@ const ChamadoTrashList = () => {
   };
 
   return (
-    <div className="p-8 bg-gray-50 min-h-screen">
-      <div className="max-w-6xl mx-auto">
-        <header className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="px-1 py-4 md:py-5">
+      <div className="mx-auto max-w-7xl">
+        <section className="surface-card slide-up rounded-[34px] p-6 md:p-8">
+          <div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-800 flex items-center gap-3">
-                <FiArchive className="text-orange-500" /> Lixeira de Chamados
-              </h1>
-              <p className="text-gray-500 mt-2">Visualize e gerencie chamados removidos. Você pode restaurá-los ou aplicar a exclusão definitiva.</p>
-            </div>
-
-            <div className="flex flex-wrap gap-3 bg-white p-3 rounded-lg shadow-sm border border-gray-200">
-              <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-md border focus-within:ring-2 focus-within:ring-blue-200">
-                <FiSearch className="text-gray-400" />
-                <input 
-                  type="text" 
-                  placeholder="Buscar por título..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="bg-transparent text-sm outline-none w-40"
-                />
-              </div>
-
-              <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded-md border">
-                <FiFilter className="text-gray-400" />
-                <select 
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="bg-transparent text-sm outline-none cursor-pointer text-gray-700"
-                >
-                  <option value="">Todos os Status</option>
-                  <option value="aberto">Originalmente Aberto</option>
-                  <option value="em_andamento">Originalmente Em Andamento</option>
-                  <option value="concluido">Originalmente Concluído</option>
-                  <option value="cancelado">Originalmente Cancelado</option>
-                </select>
+              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-stone-400">Arquivados</p>
+              <div className="mt-4 flex items-center gap-3">
+                <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-stone-700 to-stone-900 text-white shadow-lg">
+                  <FiArchive size={28} />
+                </div>
+                <div>
+                  <h1 className="text-3xl font-black tracking-tight text-slate-800 md:text-4xl">Lixeira de chamados</h1>
+                  <p className="mt-1 text-sm text-stone-500">Recupere atendimentos seus que foram removidos.</p>
+                </div>
               </div>
             </div>
           </div>
-        </header>
+
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
+            <div className="rounded-[26px] border border-stone-200 bg-white p-4">
+              <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-400">
+                <FiSearch /> Pesquisar título
+              </label>
+              <input 
+                type="text" 
+                placeholder="Buscar chamado..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+              />
+            </div>
+
+            <div className="rounded-[26px] border border-stone-200 bg-white p-4">
+              <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-stone-400">
+                <FiFilter /> Status Original
+              </label>
+              <select 
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+              >
+                <option value="">Todos os Status</option>
+                <option value="aberto">Aberto</option>
+                <option value="em_andamento">Em Andamento</option>
+                <option value="concluido">Concluído</option>
+                <option value="cancelado">Cancelado</option>
+              </select>
+            </div>
+          </div>
+        </section>
 
         {loading ? (
           <div className="text-center p-20 text-gray-400 animate-pulse">Carregando itens excluídos...</div>
         ) : (
-          <div className="grid grid-cols-1 gap-6">
+          <div className="mt-6 space-y-4">
             {items.map(item => (
-              <div key={item._id} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 flex flex-col md:flex-row justify-between gap-6 border-l-8 border-l-orange-200">
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-gray-800 mb-2">{item.data.title}</h2>
-                  <p className="text-gray-600 text-sm line-clamp-2 mb-4">{item.data.description || 'Sem descrição.'}</p>
+              <article key={item._id} className="surface-card rounded-[30px] p-6 transition-transform hover:-translate-y-1">
+                <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="text-2xl font-black tracking-tight text-slate-800">{item.data.title}</h2>
+                    <p className="mt-3 text-sm leading-7 text-stone-600 line-clamp-2">
+                      {item.data.description || 'Sem descrição detalhada.'}
+                    </p>
                   
-                  <div className="mb-4 p-3 bg-orange-50 rounded-lg border border-orange-100 flex items-start gap-2">
-                    <FiAlertTriangle className="text-orange-400 mt-1 flex-shrink-0" size={14} />
-                    <p className="text-xs text-orange-800 font-medium"><span className="font-bold">Motivo da Exclusão:</span> {item.reason}</p>
+                    <div className="mt-4 p-4 bg-orange-50/60 rounded-2xl border border-orange-100 flex items-start gap-3">
+                      <FiAlertTriangle className="text-orange-500 mt-0.5 flex-shrink-0" size={16} />
+                      <p className="text-sm text-orange-900 leading-6"><span className="font-bold">Motivo:</span> {item.reason}</p>
+                    </div>
+
+                    <div className="mt-5 flex flex-wrap gap-4 text-[11px] text-stone-500 uppercase tracking-tighter">
+                      <div className="flex items-center gap-2 rounded-xl bg-stone-100 px-3 py-2">
+                        <FiCalendar /> {new Date(item.createdAt).toLocaleString()}
+                      </div>
+                    </div>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-500">
-                    <div className="flex items-center gap-2">
-                      <FiUser className="text-orange-400" /> 
-                      <span><strong>Excluído por:</strong> {item.deletedBy?.name}</span>
+                  {isAdmin && (
+                    <div className="w-full xl:w-[260px] flex flex-col gap-3">
+                      <button
+                        onClick={() => handleRestore(item._id)}
+                        className="flex items-center justify-center gap-2 bg-emerald-600 text-white py-3 px-4 rounded-2xl font-bold hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-100"
+                      >
+                        <FiRefreshCcw /> Restaurar
+                      </button>
+                      
+                      <button
+                        onClick={() => handleHardDelete(item._id)}
+                        className="flex items-center justify-center gap-2 bg-white text-rose-600 border border-rose-200 py-3 px-4 rounded-2xl font-bold hover:bg-rose-50 transition-all"
+                      >
+                        <FiTrash /> Excluir definitivo
+                      </button>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <FiCalendar /> 
-                      <span><strong>Data da Exclusão:</strong> {new Date(item.createdAt).toLocaleString()}</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
-
-                <div className="md:w-64 flex flex-col justify-center gap-3 border-t md:border-t-0 md:border-l pt-4 md:pt-0 md:pl-6">
-                  <button
-                    onClick={() => handleRestore(item._id)}
-                    className="flex items-center justify-center gap-2 bg-green-600 text-white py-2 px-4 rounded-lg font-bold hover:bg-green-700 transition-colors"
-                  >
-                    <FiRefreshCcw /> Restaurar Chamado
-                  </button>
-                  
-                  <button
-                    onClick={() => handleHardDelete(item._id)}
-                    className="flex items-center justify-center gap-2 bg-white text-red-600 border border-red-200 py-2 px-4 rounded-lg font-bold hover:bg-red-50 transition-colors"
-                  >
-                    <FiAlertTriangle /> Excluir Definitivo
-                  </button>
-                </div>
-              </div>
+              </article>
             ))}
 
-            {items.length === 0 && (
-              <div className="bg-white p-20 text-center rounded-xl border-2 border-dashed border-gray-200">
-                <FiArchive size={48} className="mx-auto text-gray-200 mb-4" />
-                <p className="text-gray-400 font-medium text-lg">A lixeira de chamados está limpa.</p>
+            {items.length === 0 && !loading && (
+              <div className="surface-card rounded-[30px] p-20 text-center">
+                <FiInfo size={48} className="mx-auto text-stone-200 mb-4" />
+                <p className="text-stone-400 font-bold text-lg">A lixeira está vazia.</p>
               </div>
             )}
           </div>
