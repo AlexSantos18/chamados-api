@@ -138,6 +138,7 @@ Para subir tudo:
 
 ```powershell
 docker compose up --build
+docker compose exec api npm run seed
 ```
 
 ### DNS local com AdGuard Home
