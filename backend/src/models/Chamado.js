@@ -1,5 +1,6 @@
 const mongoose = require('../database/connection');
 
+// O chamado concentra o estado operacional e também o histórico leve de notas internas.
 const ChamadoSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -26,6 +27,7 @@ const ChamadoSchema = new mongoose.Schema({
     ref: 'Cliente',
     required: true
   },
+  // Os anexos guardam apenas o nome do arquivo; a URL pública é montada no frontend.
   attachments: [String],
   comments: [
     {

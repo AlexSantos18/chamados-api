@@ -1,5 +1,6 @@
 module.exports = (schema) => (req, res, next) => {
   try {
+    // A validação acontece antes do controller para manter regras de entrada fora da lógica de negócio.
     schema.parse(req.body);
     next();
   } catch (err) {

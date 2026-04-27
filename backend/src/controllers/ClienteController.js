@@ -5,6 +5,7 @@ module.exports = {
     try {
       const { documento } = req.body;
 
+      // Documento funciona como chave natural para evitar clientes duplicados na base.
       const clienteExists = await Cliente.findOne({ documento });
       if (clienteExists) {
         return res.status(400).json({ error: 'Cliente com este documento já cadastrado' });
@@ -19,6 +20,7 @@ module.exports = {
 
   async list(req, res, next) {
     try {
+      // A listagem ordenada por nome facilita o consumo em selects e filtros do frontend.
       const clientes = await Cliente.find().sort('nome');
       return res.json(clientes);
     } catch (err) {
@@ -29,6 +31,7 @@ module.exports = {
   async update(req, res, next) {
     try {
       const { id } = req.params;
+      // Retorna o documento já atualizado para evitar uma segunda consulta no cliente.
       const cliente = await Cliente.findByIdAndUpdate(id, req.body, { new: true });
 
       if (!cliente) {

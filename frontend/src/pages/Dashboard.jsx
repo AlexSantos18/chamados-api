@@ -12,6 +12,7 @@ const Dashboard = () => {
   const [range, setRange] = useState(7);
 
   useEffect(() => {
+    // O range alimenta tanto os cards agregados quanto a série temporal do gráfico.
     const fetchStats = async () => {
       try {
         const response = await api.get('/dashboard', { params: { days: range } });
@@ -65,6 +66,7 @@ const Dashboard = () => {
 
     setLoading(true);
     try {
+      // Captura o dashboard completo como imagem antes de paginar manualmente no PDF.
       const canvas = await html2canvas(input, {
         scale: 2,
         useCORS: true,

@@ -10,6 +10,7 @@ const NovoChamado = () => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm();
 
   useEffect(() => {
+    // Abertura de chamado depende da base de clientes já cadastrada.
     const fetchClientes = async () => {
       try {
         const response = await api.get('/clientes');
@@ -24,6 +25,7 @@ const NovoChamado = () => {
 
   const onSubmit = async (data) => {
     setLoading(true);
+    // FormData é necessário para misturar metadados do chamado com múltiplos anexos.
     const formData = new FormData();
 
     formData.append('title', data.title);

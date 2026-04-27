@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../AuthContext';
-import api from '../services/api';
+import api, { buildUploadUrl } from '../services/api';
 import { FiBell, FiLogOut, FiSun, FiMoon, FiMenu } from 'react-icons/fi';
 
 const Header = () => {
@@ -19,6 +19,7 @@ const Header = () => {
   const [showNotif, setShowNotif] = useState(false);
 
   const handleToggleNotif = () => {
+    // Ao abrir o painel, as notificações pendentes são marcadas como lidas uma única vez.
     if (!showNotif && unreadCount > 0) markNotificationsAsRead();
     setShowNotif(!showNotif);
   };
@@ -88,7 +89,7 @@ const Header = () => {
             <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 to-amber-600 text-sm font-bold text-white">
               {user?.avatar ? (
                 <img
-                  src={`${api.defaults.baseURL}/uploads/${user.avatar}`}
+                  src={buildUploadUrl(user.avatar)}
                   alt="Avatar"
                   className="h-full w-full object-cover"
                 />

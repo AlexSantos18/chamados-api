@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 module.exports = async (req, res, next) => {
+  // Aceita apenas o formato padrão "Bearer <token>" para simplificar a leitura do header.
   const authHeader = req.headers.authorization;
 
   if (!authHeader) return res.status(401).json({ error: 'No token provided' });
@@ -17,6 +18,7 @@ module.exports = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     
+    // Recarrega o usuário no banco para refletir remoções ou mudanças de perfil/role.
     const user = await User.findById(decoded.id);
 
     if (!user) {
@@ -33,6 +35,7 @@ module.exports = async (req, res, next) => {
 };
 
 module.exports.isAdmin = (req, res, next) => {
+  // Middleware complementar usado nas rotas que exigem permissão administrativa explícita.
   if (req.userRole !== 'admin') {
     return res.status(403).json({ error: 'Acesso negado' });
   }

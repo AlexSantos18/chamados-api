@@ -13,10 +13,10 @@ const authMiddleware = require('./middlewares/auth');
 const validate = require('./middlewares/validate');
 const { registerSchema, loginSchema, chamadoSchema, commentSchema } = require('./schemas');
 
-// Rota para servir arquivos estáticos (anexos)
+// Mantém os uploads acessíveis pela própria API, útil para ambiente local e sem Nginx.
 routes.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
-// Rotas publicas
+// Rotas públicas cobrem autenticação básica e recuperação de conta.
 routes.get('/', (req, res) => {
   return res.json({ status: 'ok', message: 'API Chamados online' });
 });
@@ -31,10 +31,10 @@ routes.post('/refresh', AuthController.refresh);
 routes.post('/forgot-password', AuthController.forgotPassword);
 routes.post('/reset-password', AuthController.resetPassword);
 
-// Middleware de autenticacao
+// A partir daqui todas as rotas exigem token válido.
 routes.use(authMiddleware);
 
-// Rotas de chamados
+// Domínio principal da aplicação: consulta, criação, atualização e histórico de chamados.
 routes.get('/chamados', ChamadoController.list);
 routes.get('/dashboard', ChamadoController.getDashboard);
 routes.get('/chamados/export/csv', ChamadoController.exportCSV);
@@ -44,21 +44,21 @@ routes.put('/chamados/:id', ChamadoController.update);
 routes.post('/chamados/:id/comments', validate(commentSchema), ChamadoController.addComment);
 routes.delete('/chamados/:id/comments/:commentId', ChamadoController.deleteComment);
 
-// Notificacoes
+// Notificações persistidas do usuário autenticado.
 routes.get('/notifications', NotificationController.list);
 routes.patch('/notifications/read', NotificationController.markAsRead);
 routes.delete('/notifications', NotificationController.deleteAll);
 
-// Gestao de perfil
+// Perfil do usuário logado.
 routes.get('/me', UserController.show);
 routes.put('/profile', multerConfig.single('avatar'), UserController.update);
 
-// Gestao de clientes
+// Cadastro e manutenção da base de clientes.
 routes.get('/clientes', ClienteController.list);
 routes.post('/clientes', ClienteController.create);
 routes.put('/clientes/:id', ClienteController.update);
 
-// Rotas administrativas
+// Funcionalidades de lixeira e exclusão permanente ficam restritas ao papel de admin.
 const { isAdmin } = require('./middlewares/auth');
 routes.get('/trash', ChamadoController.listTrash);
 routes.get('/trash/tickets', ChamadoController.listTicketTrash);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import api from '../services/api';
+import api, { buildUploadUrl } from '../services/api';
 import { useAuth } from '../AuthContext';
 import { toast } from 'react-toastify';
 import { FiUser, FiMail, FiCamera, FiSave, FiLock, FiShield } from 'react-icons/fi';
@@ -17,7 +17,7 @@ const Perfil = () => {
       setValue('name', user.name);
       setValue('email', user.email);
       if (user.avatar) {
-        setAvatarPreview(`${api.defaults.baseURL}/uploads/${user.avatar}`);
+        setAvatarPreview(buildUploadUrl(user.avatar));
       }
     }
   }, [user, setValue]);

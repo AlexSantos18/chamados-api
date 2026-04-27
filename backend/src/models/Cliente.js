@@ -1,5 +1,6 @@
 const mongoose = require('../database/connection');
 
+// Cliente representa a empresa/pessoa vinculada aos chamados.
 const ClienteSchema = new mongoose.Schema({
   nome: {
     type: String,

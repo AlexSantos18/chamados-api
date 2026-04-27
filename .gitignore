@@ -3,3 +3,12 @@ backend/node_modules/
 frontend/node_modules/
 frontend/build/
 .DS_Store
+.codex
+.codex/
+backend/.env
+frontend/.env
+frontend/.env.local
+frontend/.env.development.local
+frontend/.env.test.local
+frontend/.env.production.local
+backend/uploads/

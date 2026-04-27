@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import api from '../services/api';
+import api, { buildUploadUrl } from '../services/api';
 import { toast } from 'react-toastify';
 import { useAuth } from '../AuthContext';
 import { FiArrowLeft, FiClock, FiUser, FiInfo, FiPaperclip, FiActivity, FiMessageSquare, FiSend, FiTrash2, FiBriefcase } from 'react-icons/fi';
@@ -25,6 +25,7 @@ const DetalhesChamado = () => {
 
   const fetchDetalhes = async () => {
     try {
+      // A API já devolve o chamado com logs de auditoria para montar a visão completa da tela.
       const response = await api.get(`/chamados/${id}`);
       setData(response.data);
     } catch (err) {
@@ -59,6 +60,7 @@ const DetalhesChamado = () => {
 
   const confirmCommentDelete = async (reason) => {
     try {
+      // O motivo acompanha a exclusão para preservar contexto na lixeira de auditoria.
       await api.delete(`/chamados/${id}/comments/${commentIdToDelete}`, { data: { reason } });
       toast.success('Nota removida com sucesso');
       fetchDetalhes();
@@ -106,7 +108,7 @@ const DetalhesChamado = () => {
                   </p>
                   <div className="flex flex-wrap gap-3">
                     {chamado.attachments.map((file, idx) => (
-                      <a key={idx} href={`${api.defaults.baseURL}/uploads/${file}`} target="_blank" rel="noreferrer" className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-orange-700 transition hover:border-orange-200 hover:bg-orange-50">
+                      <a key={idx} href={buildUploadUrl(file)} target="_blank" rel="noreferrer" className="rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3 text-sm font-semibold text-orange-700 transition hover:border-orange-200 hover:bg-orange-50">
                         Arquivo {idx + 1}
                       </a>
                     ))}

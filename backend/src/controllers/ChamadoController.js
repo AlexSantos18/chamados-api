@@ -56,11 +56,9 @@ module.exports = {
         return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
-      // Lógica robusta para comparar IDs (funciona sendo String ou ObjectId)
-      // Se chamado.user for um objeto (populado), pegamos o _id, senão pegamos o valor direto.
+      // O dono pode vir populado ou cru; normalizamos antes de comparar com o usuário autenticado.
       const ownerId = chamado.user?._id || chamado.user;
       
-      // Forçamos a conversão para String para evitar erros de tipo no comparador ===
       const isOwner = String(ownerId) === String(req.userId);
       const isAdmin = String(req.userRole).toLowerCase() === 'admin';
 
@@ -119,7 +117,7 @@ module.exports = {
         return res.status(403).json({ error: 'Você não tem permissão para excluir esta nota' });
       }
 
-      // Salva na lixeira antes de remover
+      // O comentário é arquivado antes da remoção para manter trilha de auditoria/restauração.
       const reason = req.body.reason || 'Removido via interface de detalhes';
       await Trash.create({
         text: comment.text,
@@ -148,7 +146,7 @@ module.exports = {
       if (priority) filters.priority = priority;
       if (clienteId) filters.cliente = clienteId;
       
-      // Se não for admin, obriga a filtrar apenas os próprios chamados
+      // Usuário comum enxerga só os próprios chamados; admin pode filtrar por outro usuário.
       if (req.userRole !== 'admin') {
         filters.user = req.userId;
       } else if (userId) {
@@ -208,7 +206,7 @@ module.exports = {
         return res.status(403).json({ error: 'Você não tem permissão para alterar este chamado' });
       }
       
-      // Impede que o usuário altere o dono do chamado via update
+      // O dono do chamado nunca pode ser alterado por payload vindo do cliente.
       const updateData = { ...req.body };
       delete updateData.user;
 
@@ -222,9 +220,9 @@ module.exports = {
         return res.status(404).json({ error: 'Chamado não encontrado' });
       }
 
-      // Emite notificação em tempo real se o status foi alterado
+      // Só gera notificação quando há mudança de status, evitando ruído em updates simples.
       if (req.body.status) {
-        // Persiste a notificação para todos os outros usuários
+        // Persistimos para leitura posterior e também emitimos em tempo real via socket.
         const message = `O chamado "${chamado.title}" foi alterado para ${chamado.status.toUpperCase()}`;
         const otherUsers = await User.find({ _id: { $ne: req.userId } });
         
@@ -308,7 +306,7 @@ module.exports = {
         cancelados: await Chamado.countDocuments({ ...filter, status: 'cancelado' }),
       };
 
-      // Busca evolução dos últimos N dias
+      // A agregação gera a série do gráfico usada pelo dashboard.
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - daysInt);
 

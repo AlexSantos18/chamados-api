@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 
+// Aceita as duas variáveis para facilitar execução local e via Docker/ambientes antigos.
 const mongoUri = process.env.MONGO_URI || process.env.MONGO_URL;
 
 if (!mongoUri) {

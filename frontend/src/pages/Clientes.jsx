@@ -28,6 +28,7 @@ const Clientes = () => {
       await api.post('/clientes', data);
       toast.success('Cliente cadastrado com sucesso!');
       reset();
+      // Recarrega a listagem após cadastro para manter a página sincronizada sem refresh manual.
       fetchClientes();
     } catch (err) {
       const errorMsg = err.response?.data?.error || 'Erro ao cadastrar cliente';

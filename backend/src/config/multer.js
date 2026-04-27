@@ -2,10 +2,10 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 
-// Define o diretório de upload
+// Todos os uploads ficam em uma pasta única compartilhada entre API, Nginx e Docker volume bind.
 const uploadDir = path.resolve(__dirname, '..', '..', 'uploads');
 
-// Garante que o diretório de upload exista
+// Garante que o bootstrap local funcione mesmo antes da pasta existir no projeto.
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -15,6 +15,7 @@ const storage = multer.diskStorage({
     cb(null, uploadDir);
   },
   filename: (req, file, cb) => {
+    // Mantém o nome original legível, mas acrescenta timestamp para reduzir colisões.
     const ext = path.extname(file.originalname);
     const name = path.basename(file.originalname, ext);
     cb(null, `${name}-${Date.now()}${ext}`);
@@ -25,6 +26,7 @@ const upload = multer({
   storage: storage,
   limits: { fileSize: 10 * 1024 * 1024 }, // Limite de 10MB por arquivo (ajuste conforme necessário)
   fileFilter: (req, file, cb) => {
+    // O filtro protege a API de anexos arbitrários e mantém a lista de tipos permitidos explícita.
     const allowedMimes = [
       'image/jpeg', 'image/pjpeg', 'image/png', 'image/gif',
       'application/pdf',

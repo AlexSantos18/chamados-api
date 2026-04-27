@@ -9,6 +9,7 @@ const Login = () => {
   const { register, handleSubmit } = useForm();
   const navigate = useNavigate();
 
+  // Se já existe sessão válida, a página de login só redireciona para o painel.
   if (signed) return <Navigate to="/dashboard" />;
 
   const onSubmit = async (data) => {

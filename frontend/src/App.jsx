@@ -22,6 +22,7 @@ import Sidebar from './components/Sidebar';
 const PrivateRoute = ({ children, adminOnly = false }) => {
   const { signed, loading, isAdmin } = useAuth();
 
+  // Centraliza a regra de proteção de rotas para evitar repetir checagens em cada página.
   if (loading) return <div className="flex h-screen items-center justify-center">Carregando...</div>;
   if (!signed) return <Navigate to="/" />;
   if (adminOnly && !isAdmin) return <Navigate to="/dashboard" />;
@@ -43,6 +44,7 @@ const AppContent = () => {
   const { darkMode } = useAuth();
 
   useEffect(() => {
+    // O tema é refletido na raiz do documento para permitir estilos globais com Tailwind.
     if (darkMode) {
       document.documentElement.classList.add('dark');
     } else {
@@ -53,6 +55,7 @@ const AppContent = () => {
 
   return (
     <BrowserRouter>
+      {/* O ToastContainer fica no topo da árvore para permitir notificações em qualquer tela. */}
       <ToastContainer autoClose={3000} />
       <Routes>
         <Route path="/" element={<Login />} />

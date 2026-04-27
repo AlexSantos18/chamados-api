@@ -41,7 +41,7 @@ Arquivo: [`frontend/.env.development`](C:\Users\asssa\Documents\LINGUAGEM\chamad
 
 ```env
 PORT=3000
-REACT_APP_API_URL=http://localhost:5000
+REACT_APP_API_URL=/api
 ```
 
 ## Instalacao
@@ -106,6 +106,14 @@ npm.cmd start
 - Frontend: [http://localhost:3000](http://localhost:3000)
 - Uploads: `http://localhost:5000/uploads/<arquivo>`
 
+### Enderecos via Docker/Nginx
+
+- Aplicacao: [http://localhost](http://localhost)
+- Aplicacao na rede: `http://<IP_DA_MAQUINA>`
+- Healthcheck pela aplicacao: `http://<IP_DA_MAQUINA>/api/health`
+- Frontend servido diretamente pelo container: `http://127.0.0.1:3002`
+- Painel do AdGuard Home: `http://<IP_DA_MAQUINA>:3000`
+
 ## Scripts da raiz
 
 ```json
@@ -131,6 +139,57 @@ Para subir tudo:
 ```powershell
 docker compose up --build
 ```
+
+### DNS local com AdGuard Home
+
+O `docker-compose.yml` inclui um servico `adguard` para publicar um DNS interno na rede local.
+
+Suba apenas o AdGuard:
+
+```bash
+docker compose up -d adguard
+```
+
+Abra o painel inicial:
+
+- `http://localhost:3000`
+- ou `http://<IP_DA_MAQUINA>:3000`
+
+Configuracao recomendada no assistente inicial:
+
+- interface web do AdGuard em `3000`
+- DNS do AdGuard em `53`
+
+Observacao importante:
+
+- nao use a porta `80` no painel web do AdGuard, porque ela ja esta ocupada pelo `nginx` da aplicacao
+
+Depois da instalacao, crie um registro DNS:
+
+- Tipo: `A`
+- Nome: `chamados.hnss`
+- Valor: `192.168.0.107`
+
+Depois configure os clientes da rede ou o roteador para usarem como DNS o IP da maquina
+onde o AdGuard esta rodando.
+
+Para que toda a rede use esse DNS, ajuste o roteador/DHCP para entregar como DNS
+o IP da maquina que esta rodando o AdGuard, ou configure manualmente os clientes.
+
+Teste:
+
+```bash
+nslookup chamados.hnss 192.168.0.107
+```
+
+Depois da resolucao DNS funcionar, a aplicacao pode ser acessada por:
+
+```text
+http://chamados.hnss
+```
+
+Se o host ja estiver usando outra aplicacao na porta `53`, o container do AdGuard
+nao vai conseguir subir ate essa porta ser liberada.
 
 ## Endpoints uteis
 
@@ -178,7 +237,8 @@ Invoke-WebRequest http://localhost:5000/health
 
 Frontend:
 
-- abra [http://localhost:3000](http://localhost:3000)
+- abra [http://localhost](http://localhost)
+- ou, usando DNS interno, `http://chamados.hnss`
 
 ## Observacoes da migracao
 

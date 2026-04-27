@@ -4,6 +4,8 @@ module.exports = (err, req, res, next) => {
     message: err.message || 'Erro interno do servidor'
   };
 
+  // Normaliza erros de infraestrutura e validação para respostas mais previsíveis na API.
+
   // Erro de ID inválido do Mongoose (CastError)
   if (err.name === 'CastError') {
     error.message = 'Recurso não encontrado (ID inválido)';

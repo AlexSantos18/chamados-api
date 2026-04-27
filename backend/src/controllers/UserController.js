@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 module.exports = {
   async show(req, res, next) {
     try {
+      // O perfil sempre é resolvido pelo ID autenticado, sem depender de params vindos da rota.
       const user = await User.findById(req.userId);
       return res.json(user);
     } catch (err) {
@@ -19,6 +20,7 @@ module.exports = {
       if (!user) return res.status(404).json({ error: 'Usuário não encontrado' });
 
       if (password) {
+        // Troca de senha sempre exige confirmação da senha atual para reduzir alteração indevida de sessão.
         if (!oldPassword) return res.status(400).json({ error: 'Senha atual obrigatória para alteração' });
         
         const checkPassword = await bcrypt.compare(oldPassword, user.password);
@@ -32,6 +34,7 @@ module.exports = {
       if (req.file) user.avatar = req.file.filename;
 
       await user.save();
+      // Remove a senha do objeto de resposta mesmo após consulta com select explícito.
       user.password = undefined;
 
       return res.json(user);

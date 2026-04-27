@@ -1,70 +1,81 @@
-version: '3.8'
-
 services:
   mongodb:
-    image: mongo:latest
+    # Banco principal usado pela API; em desenvolvimento fica exposto só para localhost do host.
+    image: mongo:8.2
     container_name: mongodb_chamados
+    restart: always
     ports:
-      - "27017:27017"
+      - "127.0.0.1:27017:27017"
     volumes:
       - mongo_data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --eval 'db.adminCommand(\"ping\")' || mongo --eval 'db.adminCommand(\"ping\")'"]
-      interval: 5s
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 3
+    networks:
+      - chamados-network
 
   api:
+    # A API fala com o Mongo pela rede interna do Compose usando o nome do serviço.
     build: ./backend
     container_name: api_chamados
-    command: npm run dev
+    restart: always
+    command: node src/server.js
     ports:
-      - "5000:5000"
+      - "127.0.0.1:5000:5000"
     environment:
       - MONGO_URI=mongodb://mongodb:27017/chamados
-      - JWT_SECRET=SuaChaveSuperSecretaNoDocker
+      - JWT_SECRET=${JWT_SECRET:-SuaChaveSuperSecreta123}
       - PORT=5000
-      - MAIL_HOST=sandbox.smtp.mailtrap.io
-      - MAIL_PORT=2525
-      - MAIL_USER=seu_usuario
-      - MAIL_PASS=sua_senha
+      - MAIL_HOST=${MAIL_HOST:-sandbox.smtp.mailtrap.io}
+      - MAIL_PORT=${MAIL_PORT:-2525}
+      - MAIL_USER=${MAIL_USER:-seu_usuario}
+      - MAIL_PASS=${MAIL_PASS:-sua_senha}
     depends_on:
       mongodb:
         condition: service_healthy
     volumes:
-      - ./backend:/usr/app
-      - /usr/app/node_modules
-    stdin_open: true
-    tty: true
+      - ./backend/uploads:/uploads
+    networks:
+      - chamados-network
 
   frontend:
-    build: ./frontend
+    # O build usa /api relativo para funcionar tanto por IP quanto por domínio interno atrás do Nginx.
+    build:
+      context: ./frontend
+      args:
+        - REACT_APP_API_URL=/api
     container_name: frontend_chamados
-    command: npm start
+    restart: always
+    command: ["npx", "serve", "-s", "build", "-l", "3000"]
     ports:
-      - "3000:3000"
-    environment:
-      - REACT_APP_API_URL=http://localhost:5000
-      - HOST=0.0.0.0
-      - WATCHPACK_POLLING=true
-      - CHOKIDAR_USEPOLLING=true
-    volumes:
-      - ./frontend:/usr/app
-      - /usr/app/node_modules
-    stdin_open: true
-    tty: true
+      - "127.0.0.1:3002:3000"
     depends_on:
       - api
+    networks:
+      - chamados-network
 
-  seed:
-    build: ./backend
-    container_name: seed_chamados
-    command: npm run seed
-    environment:
-      - MONGO_URI=mongodb://mongodb:27017/chamados
+  nginx:
+    # Camada pública única da stack: entrega o frontend e encaminha /api, /socket.io e /uploads.
+    image: nginx:alpine
+    container_name: nginx_chamados
+    restart: always
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./backend/uploads:/uploads:ro
     depends_on:
-      mongodb:
-        condition: service_healthy
+      - api
+      - frontend
+    networks:
+      - chamados-network
+
+networks:
+  chamados-network:
+    driver: bridge
 
 volumes:
+  # Volume persistente do Mongo; apagar este volume reinicia o banco do zero.
   mongo_data:

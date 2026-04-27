@@ -1,5 +1,6 @@
 const mongoose = require('../database/connection');
 
+// Notificações são persistidas para o usuário ver depois, mesmo se perder o evento em tempo real.
 const NotificationSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,

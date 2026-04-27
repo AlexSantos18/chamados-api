@@ -20,6 +20,7 @@ const Sidebar = () => {
 
   return (
     <>
+      {/* Overlay mobile fecha o menu ao clicar fora, sem afetar o comportamento sticky do desktop. */}
       {isSidebarOpen && (
         <button
           type="button"
@@ -56,6 +57,7 @@ const Sidebar = () => {
 
           <nav className="flex-1 space-y-2">
             {menuItems.map((item) => {
+              // Itens administrativos são filtrados no cliente para simplificar a navegação visível.
               if (item.admin && !isAdmin) return null;
 
               const active = isActive(item.path);

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import api from '../services/api';
+import api, { buildUploadUrl } from '../services/api';
 import { toast } from 'react-toastify';
 import { useAuth } from '../AuthContext';
 import { FiSearch, FiFilter, FiUser, FiBriefcase, FiCalendar, FiExternalLink, FiChevronLeft, FiChevronRight, FiTrash2, FiDownload, FiRefreshCw } from 'react-icons/fi';
@@ -23,6 +23,7 @@ const ListagemChamados = () => {
   const { isAdmin } = useAuth();
 
   useEffect(() => {
+    // Os clientes são carregados à parte para popular os filtros da listagem.
     const fetchClientes = async () => {
       try {
         const response = await api.get('/clientes');
@@ -37,6 +38,7 @@ const ListagemChamados = () => {
   const fetchChamados = async () => {
     setLoading(true);
     try {
+      // Filtros vazios são enviados como undefined para não poluir a querystring.
       const params = {
         page,
         limit: 5,
@@ -85,6 +87,7 @@ const ListagemChamados = () => {
 
   const handleExportCSV = async () => {
     try {
+      // A exportação reutiliza os mesmos filtros ativos da tela para manter consistência.
       const queryParams = new URLSearchParams({
         status: status || '',
         clienteId: clienteId || '',
@@ -256,7 +259,7 @@ const ListagemChamados = () => {
                           <p className="mb-2 text-xs font-bold uppercase tracking-[0.24em] text-stone-400">Anexos</p>
                           <div className="flex flex-wrap gap-2">
                             {chamado.attachments?.length > 0 ? chamado.attachments.map((file, idx) => (
-                              <a key={idx} href={`${api.defaults.baseURL}/uploads/${file}`} target="_blank" rel="noreferrer" className="rounded-2xl border border-stone-200 bg-stone-50 p-3 text-orange-700 transition hover:border-orange-200 hover:bg-orange-50">
+                              <a key={idx} href={buildUploadUrl(file)} target="_blank" rel="noreferrer" className="rounded-2xl border border-stone-200 bg-stone-50 p-3 text-orange-700 transition hover:border-orange-200 hover:bg-orange-50">
                                 <FiExternalLink size={16} />
                               </a>
                             )) : <span className="text-sm italic text-stone-400">Nenhum anexo</span>}

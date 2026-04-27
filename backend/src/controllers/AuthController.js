@@ -65,6 +65,7 @@ module.exports = {
     if (!refreshToken) return res.status(401).json({ error: 'Refresh token required' });
 
     try {
+      // O refresh token só carrega o ID do usuário; ao validar, emitimos um novo par de tokens.
       const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET);
       
       return res.json({
@@ -82,6 +83,7 @@ module.exports = {
       const user = await User.findOne({ email });
       if (!user) return res.status(400).json({ error: 'Usuário não encontrado' });
 
+      // Gera um token curto de uso único para recuperação sem expor o JWT principal.
       const token = crypto.randomBytes(20).toString('hex');
       const now = new Date();
       now.setHours(now.getHours() + 1); // Token expira em 1 hora
@@ -104,6 +106,7 @@ module.exports = {
       const user = await User.findOne({ email })
         .select('+passwordResetToken passwordResetExpires');
 
+      // Busca explícita dos campos com select:false para validar o fluxo de recuperação.
       if (!user) return res.status(400).json({ error: 'Usuário não encontrado' });
 
       if (token !== user.passwordResetToken)

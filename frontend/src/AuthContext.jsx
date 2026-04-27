@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect, useContext, useMemo } from 'react';
-import api from './services/api';
+import api, { SOCKET_URL } from './services/api';
 import io from 'socket.io-client';
 import { toast } from 'react-toastify';
 
@@ -79,7 +79,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (user) {
       fetchNotifications();
-      const socket = io(api.defaults.baseURL, { transports: ['websocket'] });
+      // O socket só é aberto após login para não manter conexão anônima desnecessária.
+      const socket = io(SOCKET_URL, { transports: ['websocket'] });
       socket.on('statusChanged', (data) => {
         if (data.updatedBy !== user._id) {
           fetchNotifications();

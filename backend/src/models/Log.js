@@ -1,5 +1,6 @@
 const mongoose = require('../database/connection');
 
+// Log simples de auditoria para ações relevantes no ciclo de vida do chamado.
 const LogSchema = new mongoose.Schema({
   action: {
     type: String,

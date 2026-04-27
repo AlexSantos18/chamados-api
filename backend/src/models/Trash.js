@@ -1,5 +1,6 @@
 const mongoose = require('../database/connection');
 
+// Lixeira específica para notas removidas, preservando autoria e contexto do chamado.
 const TrashSchema = new mongoose.Schema({
   text: { type: String, required: true },
   author: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
