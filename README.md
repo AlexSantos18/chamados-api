@@ -137,7 +137,7 @@ Cada aplicacao agora possui seu proprio `Dockerfile`:
 Para subir tudo:
 
 ```powershell
-docker compose up --build
+docker compose up -d --build
 docker compose exec api npm run seed
 ```
 
