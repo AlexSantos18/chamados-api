@@ -11,6 +11,7 @@ ARG REACT_APP_API_URL=/api
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Build for production
+RUN chmod -R a+rx ./node_modules/.bin || true
 RUN npm run build
 
 EXPOSE 3000
