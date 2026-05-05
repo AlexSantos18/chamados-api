@@ -3,11 +3,20 @@ import { useForm } from 'react-hook-form';
 import api, { buildUploadUrl } from '../services/api';
 import { useAuth } from '../AuthContext';
 import { toast } from 'react-toastify';
-import { FiUser, FiMail, FiCamera, FiSave, FiLock, FiShield } from 'react-icons/fi';
+import {
+  FiCamera,
+  FiCheckCircle,
+  FiLock,
+  FiMail,
+  FiRefreshCw,
+  FiSave,
+  FiShield,
+  FiUser
+} from 'react-icons/fi';
 
 const Perfil = () => {
-  const { user, updateUser } = useAuth();
-  const { register, handleSubmit, setValue, watch, resetField } = useForm();
+  const { user, updateUser, isAdmin } = useAuth();
+  const { register, handleSubmit, setValue, watch, resetField, formState: { errors } } = useForm();
   const [avatarPreview, setAvatarPreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
@@ -80,33 +89,49 @@ const Perfil = () => {
     }
   };
 
+  const controlClass = (hasError) => `w-full rounded-xl border bg-stone-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition dark:bg-white/5 dark:text-white ${
+    hasError
+      ? 'border-rose-400 focus:ring-4 focus:ring-rose-100 dark:border-rose-400/40 dark:focus:ring-rose-500/10'
+      : 'border-stone-200 focus:border-blue-300 focus:ring-4 focus:ring-blue-100 dark:border-white/10 dark:focus:border-blue-400 dark:focus:ring-blue-500/10'
+  }`;
+
   return (
     <div className="px-1 py-4 md:py-5">
-      <div className="mx-auto max-w-5xl">
-        <section className="surface-card slide-up rounded-[34px] p-6 md:p-8">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-stone-400">Conta</p>
-              <div className="mt-4 flex items-center gap-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-[0_16px_32px_rgba(168,85,247,0.28)]">
-                  <FiUser size={28} />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-black tracking-tight text-slate-800 md:text-4xl">Meu perfil</h1>
-                  <p className="mt-1 text-sm text-stone-500">Atualize dados pessoais, avatar e credenciais de acesso.</p>
-                </div>
+      <div className="mx-auto max-w-6xl space-y-6">
+        <section className="surface-card slide-up overflow-hidden rounded-2xl dark:bg-slate-900 dark:border dark:border-white/10">
+          <div className="grid gap-4 p-5 md:p-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-center">
+            <div className="flex items-start gap-4">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-fuchsia-600 text-white shadow-lg">
+                <FiUser size={24} />
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.32em] text-stone-400 dark:text-slate-400">Conta</p>
+                <h1 className="mt-1 text-2xl font-black tracking-tight text-slate-900 dark:text-white md:text-3xl">Meu perfil</h1>
+                <p className="mt-2 max-w-2xl text-[13px] leading-5 text-stone-500 dark:text-slate-300">
+                  Atualize dados pessoais, avatar e credenciais de acesso.
+                </p>
               </div>
             </div>
 
-            <div className="rounded-[26px] border border-violet-200 bg-violet-50/70 px-5 py-4">
-              <p className="text-xs font-bold uppercase tracking-[0.26em] text-violet-600">Seguranca</p>
-              <p className="mt-2 text-sm leading-6 text-stone-600">Mantenha suas informacoes e senha sempre atualizadas.</p>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div className="rounded-xl border border-stone-200/70 bg-white/70 p-3 dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-400">Papel</p>
+                <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">{isAdmin ? 'Admin' : 'Usuario'}</p>
+              </div>
+              <div className="rounded-xl border border-stone-200/70 bg-white/70 p-3 dark:border-white/10 dark:bg-white/5">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-stone-400">Avatar</p>
+                <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">{avatarPreview ? 'Configurado' : 'Pendente'}</p>
+              </div>
+              <div className="rounded-xl border border-violet-200 bg-violet-50/70 p-3 dark:border-violet-400/20 dark:bg-violet-500/10">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-violet-600 dark:text-violet-200">Seguranca</p>
+                <p className="mt-1 text-xs font-black text-slate-900 dark:text-white">Ativa</p>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="mt-6 grid gap-6 xl:grid-cols-[0.75fr_1.25fr]">
-          <div className="surface-card rounded-[34px] p-6 md:p-8">
+        <section className="grid gap-6 xl:grid-cols-[0.75fr_1.25fr]">
+          <div className="surface-card rounded-2xl p-5 md:p-6 dark:bg-slate-900 dark:border dark:border-white/10">
             <div className="flex flex-col items-center">
               <div
                 className={`relative transition-all duration-200 ${isDragging ? 'scale-105' : ''}`}
@@ -115,62 +140,72 @@ const Perfil = () => {
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
               >
-                <div className={`flex h-36 w-36 items-center justify-center overflow-hidden rounded-[36px] border-4 ${isDragging ? 'border-orange-300 bg-orange-50' : 'border-white bg-stone-100'} text-stone-400 shadow-[0_18px_40px_rgba(76,52,32,0.12)]`}>
+                <div className={`flex h-32 w-32 items-center justify-center overflow-hidden rounded-2xl border-4 ${isDragging ? 'border-blue-300 bg-blue-50 dark:bg-blue-500/10' : 'border-white bg-stone-100 dark:border-white/10 dark:bg-white/5'} text-stone-400 shadow-lg`}>
                   {avatarPreview ? (
                     <img src={avatarPreview} alt="Avatar" className="h-full w-full object-cover" />
                   ) : (
-                    <FiUser size={52} />
+                    <FiUser size={48} />
                   )}
                 </div>
-                <label className="absolute -bottom-2 -right-2 rounded-2xl bg-slate-900 p-3 text-white shadow-lg transition hover:bg-slate-800">
-                  <FiCamera size={18} />
-                  <input type="file" className="hidden" {...register('avatar')} onChange={handleAvatarChange} />
+                <label className="absolute -bottom-2 -right-2 cursor-pointer rounded-xl bg-slate-900 p-2.5 text-white shadow-lg transition hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500">
+                  <FiCamera size={16} />
+                  <input type="file" accept="image/*" className="hidden" {...register('avatar')} onChange={handleAvatarChange} />
                 </label>
               </div>
-              <p className={`mt-4 text-sm transition-colors ${isDragging ? 'font-semibold text-orange-600' : 'text-stone-500'}`}>
+
+              <p className={`mt-3 text-center text-xs transition-colors ${isDragging ? 'font-semibold text-blue-600' : 'text-stone-500 dark:text-slate-300'}`}>
                 {isDragging ? 'Solte a imagem aqui.' : 'Clique ou arraste uma foto para alterar.'}
               </p>
-              <div className="mt-6 w-full rounded-[26px] border border-stone-200/80 bg-white/70 p-4 text-sm text-stone-500">
+
+              <div className="mt-5 w-full rounded-2xl border border-stone-200/80 bg-white/70 p-4 text-[13px] text-stone-500 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
                 <p className="text-xs font-bold uppercase tracking-[0.24em] text-stone-400">Conta ativa</p>
-                <p className="mt-2 font-semibold text-slate-800">{user?.name}</p>
-                <p className="mt-1">{user?.email}</p>
+                <p className="mt-2 text-base font-bold text-slate-900 dark:text-white">{user?.name}</p>
+                <p className="mt-1 break-all">{user?.email}</p>
+              </div>
+
+              <div className="mt-4 w-full rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4 text-[13px] text-emerald-900 dark:border-emerald-400/20 dark:bg-emerald-500/10 dark:text-emerald-100">
+                <p className="flex items-center gap-2 font-bold"><FiCheckCircle /> Sessao sincronizada</p>
+                <p className="mt-1 leading-5">Ao salvar, o avatar e o nome atualizam tambem na navegacao.</p>
               </div>
             </div>
           </div>
 
-          <div className="surface-card rounded-[34px] p-6 md:p-8">
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-              <div className="rounded-[28px] border border-stone-200/80 bg-white/70 p-5">
+          <div className="surface-card rounded-2xl p-5 md:p-6 dark:bg-slate-900 dark:border dark:border-white/10">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <div>
                 <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-stone-400">
                   <FiUser size={14} /> Nome completo
                 </label>
-                <input type="text" {...register('name', { required: true })} className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100" />
+                <input type="text" {...register('name', { required: 'Nome e obrigatorio' })} className={controlClass(errors.name)} />
+                {errors.name && <p className="mt-2 text-sm text-rose-500">{errors.name.message}</p>}
               </div>
 
-              <div className="rounded-[28px] border border-stone-200/80 bg-white/70 p-5">
+              <div>
                 <label className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.24em] text-stone-400">
                   <FiMail size={14} /> E-mail
                 </label>
-                <input type="email" {...register('email', { required: true })} className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100" />
+                <input type="email" {...register('email', { required: 'E-mail e obrigatorio' })} className={controlClass(errors.email)} />
+                {errors.email && <p className="mt-2 text-sm text-rose-500">{errors.email.message}</p>}
               </div>
 
-              <div className="rounded-[28px] border border-stone-200/80 bg-white/70 p-5">
-                <h3 className="flex items-center gap-2 text-xl font-black tracking-tight text-slate-800">
-                  <FiShield className="text-orange-600" /> Seguranca
+              <div className="rounded-2xl border border-stone-200/80 bg-white/70 p-4 dark:border-white/10 dark:bg-white/5">
+                <h3 className="flex items-center gap-2 text-lg font-black tracking-tight text-slate-900 dark:text-white">
+                  <FiShield className="text-blue-600" /> Seguranca
                 </h3>
-                <p className="mt-2 text-sm text-stone-500">Preencha a senha atual apenas se quiser trocar a credencial.</p>
+                <p className="mt-1 text-[13px] text-stone-500 dark:text-slate-300">Preencha a senha atual apenas se quiser trocar a credencial.</p>
 
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
+                <div className="mt-4 grid gap-3 md:grid-cols-2">
                   <div className="md:col-span-2">
                     <label className="mb-2 block text-xs font-bold uppercase tracking-[0.24em] text-stone-400">
                       <span className="inline-flex items-center gap-2"><FiLock size={14} /> Senha atual</span>
                     </label>
-                    <input type="password" {...register('oldPassword')} placeholder="Digite sua senha atual para alterar" className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100" />
+                    <input type="password" {...register('oldPassword')} placeholder="Digite sua senha atual para alterar" className={controlClass(false)} />
                   </div>
 
                   <div>
                     <label className="mb-2 block text-xs font-bold uppercase tracking-[0.24em] text-stone-400">Nova senha</label>
-                    <input type="password" {...register('password', { minLength: { value: 6, message: 'Minimo 6 caracteres' } })} className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100" />
+                    <input type="password" {...register('password', { minLength: { value: 6, message: 'Minimo 6 caracteres' } })} className={controlClass(errors.password)} />
+                    {errors.password && <p className="mt-2 text-sm text-rose-500">{errors.password.message}</p>}
                   </div>
 
                   <div>
@@ -180,15 +215,17 @@ const Perfil = () => {
                       {...register('confirmPassword', {
                         validate: (value) => value === watch('password') || 'As senhas nao coincidem'
                       })}
-                      className="w-full rounded-2xl border border-stone-200 bg-stone-50 px-4 py-3.5 outline-none transition focus:border-orange-300 focus:ring-4 focus:ring-orange-100"
+                      className={controlClass(errors.confirmPassword)}
                     />
+                    {errors.confirmPassword && <p className="mt-2 text-sm text-rose-500">{errors.confirmPassword.message}</p>}
                   </div>
                 </div>
               </div>
 
-              <button type="submit" disabled={loading} className="brand-button w-full rounded-2xl px-5 py-4 font-bold text-white transition disabled:cursor-not-allowed disabled:opacity-60">
-                <span className="inline-flex items-center gap-2">
-                  {loading ? 'Salvando...' : <><FiSave /> Salvar alteracoes</>}
+              <button type="submit" disabled={loading} className="w-full rounded-xl bg-blue-600 px-5 py-3 font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60">
+                <span className="inline-flex items-center justify-center gap-2">
+                  {loading ? <FiRefreshCw className="animate-spin" /> : <FiSave />}
+                  {loading ? 'Salvando...' : 'Salvar alteracoes'}
                 </span>
               </button>
             </form>

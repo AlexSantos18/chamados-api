@@ -32,7 +32,7 @@ const PrivateRoute = ({ children, adminOnly = false }) => {
       <Sidebar />
       <div className="flex min-h-screen flex-1 flex-col md:pl-2">
         <Header />
-        <main className="flex-1 overflow-y-auto px-3 pb-3 md:px-5 md:pb-5">
+        <main className="flex-1 overflow-y-auto px-2 pb-2 md:px-4 md:pb-4">
           {children}
         </main>
       </div>

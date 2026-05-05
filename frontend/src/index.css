@@ -2,7 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
+@layer base {
+  html {
+    font-size: 90%;
+  }
+}
+
+ :root {
   color-scheme: light;
   --app-bg: #f3efe6;
   --app-bg-soft: #fbf8f2;
@@ -12,6 +18,18 @@
   --app-brand: #b85c38;
   --app-brand-deep: #7f5539;
   --app-brand-soft: #f4d8c2;
+}
+
+.dark {
+  color-scheme: dark;
+  --app-bg: #0f172a;
+  --app-bg-soft: #111827;
+  --app-ink: #e5e7eb;
+  --app-panel: rgba(15, 23, 42, 0.82);
+  --app-line: rgba(255, 255, 255, 0.1);
+  --app-brand: #f97316;
+  --app-brand-deep: #c2410c;
+  --app-brand-soft: rgba(249, 115, 22, 0.18);
 }
 
 html,
@@ -29,6 +47,13 @@ body {
     radial-gradient(circle at top right, rgba(244, 216, 194, 0.7), transparent 24%),
     linear-gradient(180deg, var(--app-bg-soft) 0%, var(--app-bg) 100%);
   background-attachment: fixed;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at top left, rgba(59, 130, 246, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(249, 115, 22, 0.14), transparent 24%),
+    linear-gradient(180deg, var(--app-bg-soft) 0%, var(--app-bg) 100%);
 }
 
 * {
@@ -60,6 +85,10 @@ body {
   backdrop-filter: blur(14px);
   border: 1px solid var(--app-line);
   box-shadow: 0 18px 60px rgba(76, 52, 32, 0.08);
+}
+
+.dark .surface-card {
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.24);
 }
 
 .brand-button {

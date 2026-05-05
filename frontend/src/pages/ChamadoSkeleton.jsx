@@ -1,8 +1,8 @@
 import React from 'react';
 
-const ChamadoSkeleton = () => {
+const ChamadoSkeleton = ({ className = '' }) => {
   return (
-    <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 animate-pulse">
+    <div className={`bg-white p-6 rounded-xl shadow-sm border border-gray-200 animate-pulse dark:bg-slate-900 dark:border dark:border-white/10 ${className}`}>
       <div className="flex flex-col md:flex-row justify-between gap-4">
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-4">

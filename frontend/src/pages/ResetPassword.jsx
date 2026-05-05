@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import api from '../services/api';
 import { toast } from 'react-toastify';
-import { FiMail, FiLock, FiKey, FiArrowLeft, FiCheckCircle } from 'react-icons/fi';
+import { FiArrowLeft, FiCheckCircle, FiKey, FiLock, FiMail, FiRefreshCw } from 'react-icons/fi';
 import { Link, useNavigate } from 'react-router-dom';
+import AuthLayout from './AuthLayout';
 
 const ResetPassword = () => {
   const [loading, setLoading] = useState(false);
@@ -19,8 +20,8 @@ const ResetPassword = () => {
         password: data.password
       });
 
-      toast.success('Senha atualizada com sucesso! Faça login agora.');
-      navigate('/'); // Redireciona para a tela de login
+      toast.success('Senha atualizada com sucesso! Faca login agora.');
+      navigate('/');
     } catch (err) {
       toast.error(err.response?.data?.error || 'Erro ao redefinir senha');
     } finally {
@@ -28,83 +29,92 @@ const ResetPassword = () => {
     }
   };
 
+  const inputClass = (hasError) => `w-full rounded-2xl border bg-white/80 px-4 py-4 pl-12 text-slate-800 outline-none transition dark:bg-white/5 dark:text-white ${
+    hasError
+      ? 'border-rose-300 focus:border-rose-400 focus:ring-4 focus:ring-rose-100 dark:border-rose-400/40 dark:focus:ring-rose-500/10'
+      : 'border-stone-200 focus:border-blue-300 focus:ring-4 focus:ring-blue-100 dark:border-white/10 dark:focus:border-blue-400 dark:focus:ring-blue-500/10'
+  }`;
+
   return (
-    <div className="bg-gray-100 h-screen flex items-center justify-center p-4">
-      <div className="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md">
-        <header className="mb-6">
-          <h2 className="text-2xl font-bold text-gray-800">Definir Nova Senha</h2>
-          <p className="text-gray-500 text-sm">Insira o token recebido no seu e-mail e sua nova senha.</p>
-        </header>
-        
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Campo de E-mail */}
-          <div className="relative">
-            <FiMail className="absolute top-3.5 left-3 text-gray-400" />
-            <input 
-              type="email" 
-              {...register('email', { required: 'E-mail é obrigatório' })}
+    <AuthLayout
+      eyebrow="Nova senha"
+      title="Definir acesso"
+      description="Insira o token recebido por e-mail e escolha uma nova senha para sua conta."
+      compact
+    >
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+        <div>
+          <label className="relative block">
+            <FiMail className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+            <input
+              type="email"
+              {...register('email', { required: 'E-mail e obrigatorio' })}
               placeholder="Seu e-mail"
-              className={`w-full pl-10 p-3 border rounded-xl outline-none focus:ring-2 transition-all ${errors.email ? 'border-red-500 focus:ring-red-200' : 'focus:ring-blue-200'}`}
+              className={inputClass(errors.email)}
             />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>}
-          </div>
+          </label>
+          {errors.email && <p className="mt-2 text-sm text-rose-500">{errors.email.message}</p>}
+        </div>
 
-          {/* Campo de Token */}
-          <div className="relative">
-            <FiKey className="absolute top-3.5 left-3 text-gray-400" />
-            <input 
-              type="text" 
-              {...register('token', { required: 'Token é obrigatório' })}
-              placeholder="Token de recuperação"
-              className={`w-full pl-10 p-3 border rounded-xl outline-none focus:ring-2 transition-all ${errors.token ? 'border-red-500 focus:ring-red-200' : 'focus:ring-blue-200'}`}
+        <div>
+          <label className="relative block">
+            <FiKey className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+            <input
+              type="text"
+              {...register('token', { required: 'Token e obrigatorio' })}
+              placeholder="Token de recuperacao"
+              className={inputClass(errors.token)}
             />
-            {errors.token && <p className="text-red-500 text-xs mt-1">{errors.token.message}</p>}
-          </div>
+          </label>
+          {errors.token && <p className="mt-2 text-sm text-rose-500">{errors.token.message}</p>}
+        </div>
 
-          {/* Nova Senha */}
-          <div className="relative">
-            <FiLock className="absolute top-3.5 left-3 text-gray-400" />
-            <input 
-              type="password" 
-              {...register('password', { 
-                required: 'Nova senha é obrigatória',
-                minLength: { value: 6, message: 'Mínimo 6 caracteres' }
+        <div>
+          <label className="relative block">
+            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+            <input
+              type="password"
+              {...register('password', {
+                required: 'Nova senha e obrigatoria',
+                minLength: { value: 6, message: 'Minimo 6 caracteres' }
               })}
               placeholder="Nova senha"
-              className={`w-full pl-10 p-3 border rounded-xl outline-none focus:ring-2 transition-all ${errors.password ? 'border-red-500 focus:ring-red-200' : 'focus:ring-blue-200'}`}
+              className={inputClass(errors.password)}
             />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password.message}</p>}
-          </div>
+          </label>
+          {errors.password && <p className="mt-2 text-sm text-rose-500">{errors.password.message}</p>}
+        </div>
 
-          {/* Confirmar Nova Senha */}
-          <div className="relative">
-            <FiLock className="absolute top-3.5 left-3 text-gray-400" />
-            <input 
-              type="password" 
-              {...register('confirmPassword', { 
-                required: 'Confirmação é obrigatória',
-                validate: (value) => value === watch('password') || 'As senhas não coincidem'
+        <div>
+          <label className="relative block">
+            <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-400" />
+            <input
+              type="password"
+              {...register('confirmPassword', {
+                required: 'Confirmacao e obrigatoria',
+                validate: (value) => value === watch('password') || 'As senhas nao coincidem'
               })}
               placeholder="Confirmar nova senha"
-              className={`w-full pl-10 p-3 border rounded-xl outline-none focus:ring-2 transition-all ${errors.confirmPassword ? 'border-red-500 focus:ring-red-200' : 'focus:ring-blue-200'}`}
+              className={inputClass(errors.confirmPassword)}
             />
-            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>}
-          </div>
+          </label>
+          {errors.confirmPassword && <p className="mt-2 text-sm text-rose-500">{errors.confirmPassword.message}</p>}
+        </div>
 
-          <button 
-            type="submit"
-            disabled={loading} 
-            className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold hover:bg-blue-700 disabled:bg-gray-400 transition-colors flex items-center justify-center gap-2 shadow-lg shadow-blue-100"
-          >
-            {loading ? 'Processando...' : <><FiCheckCircle /> Alterar Senha</>}
-          </button>
-        </form>
+        <button
+          type="submit"
+          disabled={loading}
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-4 font-bold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          {loading ? <FiRefreshCw className="animate-spin" /> : <FiCheckCircle />}
+          {loading ? 'Processando...' : 'Alterar senha'}
+        </button>
+      </form>
 
-        <Link to="/" className="mt-6 flex items-center justify-center gap-2 text-sm text-gray-500 hover:text-blue-600 font-medium">
-          <FiArrowLeft /> Voltar para o Login
-        </Link>
-      </div>
-    </div>
+      <Link to="/" className="mt-6 flex items-center justify-center gap-2 text-sm font-semibold text-stone-500 transition hover:text-blue-700 dark:text-slate-300 dark:hover:text-blue-200">
+        <FiArrowLeft /> Voltar para o login
+      </Link>
+    </AuthLayout>
   );
 };
 
