@@ -51,8 +51,8 @@ const statusConfig = [
     label: 'Em andamento',
     valueKey: 'em_andamento',
     icon: <FiActivity size={20} />,
-    tone: 'from-blue-500 to-indigo-700',
-    accent: 'bg-blue-500'
+    tone: 'from-yellow-400 to-yellow-600',
+    accent: 'bg-yellow-500'
   },
   {
     key: 'concluidos',
@@ -122,7 +122,7 @@ const Dashboard = () => {
 
   const pieData = [
     { name: 'Abertos', value: stats?.abertos || 0, color: '#38bdf8' },
-    { name: 'Em andamento', value: stats?.em_andamento || 0, color: '#4f46e5' },
+    { name: 'Em andamento', value: stats?.em_andamento || 0, color: '#dae546' },
     { name: 'Concluidos', value: stats?.concluidos || 0, color: '#22c55e' },
     { name: 'Cancelados', value: stats?.cancelados || 0, color: '#f43f5e' }
   ].filter((d) => d.value > 0);
