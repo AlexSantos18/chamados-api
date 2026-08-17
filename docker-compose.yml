@@ -36,7 +36,9 @@ services:
       mongodb:
         condition: service_healthy
     volumes:
-      - ./backend/uploads:/uploads
+      # O Multer grava em /usr/app/uploads (WORKDIR do backend). Montar nesse
+      # mesmo caminho garante que a API e o Nginx enxerguem os mesmos arquivos.
+      - ./backend/uploads:/usr/app/uploads
     networks:
       - chamados-network
 

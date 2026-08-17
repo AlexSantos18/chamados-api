@@ -19,7 +19,7 @@ app.use(cors());
 app.use(express.json());
 
 // Serve arquivos estáticos (fotos de perfil e anexos)
-app.use('/uploads', express.static(path.resolve(__dirname, '..', '..', 'uploads')));
+app.use('/uploads', express.static(path.resolve(__dirname, '..', 'uploads')));
 
 // Injeta a instância do socket em cada request para permitir eventos em controllers.
 app.use((req, res, next) => {
