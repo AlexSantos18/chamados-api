@@ -22,7 +22,7 @@ module.exports = {
       const { name, email, password } = req.body;
 
       if(await User.findOne({ email }))
-        return res.status(400).json({ error: 'User already exists' });
+        return res.status(400).json({ error: 'Usuario já existe' });
 
       // Garante que o usuário sempre comece como 'user'
       const user = await User.create({ name, email, password, role: 'user' });
@@ -35,7 +35,7 @@ module.exports = {
         refreshToken: generateRefreshToken({ id: user._id })
       });
     } catch (err) {
-      return res.status(400).json({ error: 'Registration failed' });
+      return res.status(400).json({ error: 'Falha ao registrar usuário' });
     }
   },
 
@@ -45,10 +45,10 @@ module.exports = {
     // .select('+password') é necessário porque o campo está com select: false no model
     const user = await User.findOne({ email }).select('+password');
     
-    if (!user) return res.status(400).json({ error: "User not found" });
+    if (!user) return res.status(400).json({ error: "Usuario não encontrado" });
 
     const valid = await bcrypt.compare(password, user.password);
-    if (!valid) return res.status(400).json({ error: "Invalid password" });
+    if (!valid) return res.status(400).json({ error: "Senha inválida" });
 
     user.password = undefined;
 
@@ -62,7 +62,7 @@ module.exports = {
   async refresh(req, res) {
     const { refreshToken } = req.body;
 
-    if (!refreshToken) return res.status(401).json({ error: 'Refresh token required' });
+    if (!refreshToken) return res.status(401).json({ error: 'Token de atualização necessário' });
 
     try {
       // O refresh token só carrega o ID do usuário; ao validar, emitimos um novo par de tokens.
@@ -73,7 +73,7 @@ module.exports = {
         refreshToken: generateRefreshToken({ id: decoded.id })
       });
     } catch (err) {
-      return res.status(401).json({ error: 'Invalid refresh token' });
+      return res.status(401).json({ error: 'Token de atualização inválido' });
     }
   },
 
